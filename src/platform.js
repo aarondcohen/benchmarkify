@@ -1,26 +1,20 @@
 "use strict";
 
-let os = require("os");
+const os = require("os");
 
 module.exports = logger => {
+	const indent = ' '.repeat(3);
+
 	logger.info("Platform info:");
 	logger.info("==============");
+	logger.info(`${indent}${os.type()} ${os.release()} ${os.arch()}`);
+	logger.info(`${indent}Node.JS: ${process.versions.node}`);
+	logger.info(`${indent}V8: ${process.versions.v8}`);
 
-	logger.info("  ", os.type() + " " + os.release() + " " + os.arch());
-	logger.info("  ", "Node.JS:", process.versions.node);
-	logger.info("  ", "V8:", process.versions.v8);
+	const cpuModelToCount = os.cpus()
+		.map((cpu) => cpu.model)
+		.reduce((o, model) => (o[model] = (o[model] || 0) + 1, o), {});
 
-	let cpus = os.cpus().map(function (cpu) {
-		return cpu.model;
-	}).reduce(function (o, model) {
-		if (!o[model]) o[model] = 0;
-		o[model]++;
-		return o;
-	}, {});
-
-	cpus = Object.keys(cpus).map(function (key) {
-		return key + " \u00d7 " + cpus[key];
-	}).join("\n");
-
-	logger.info("  ", cpus);
+	Object.entries(cpuModelToCount)
+		.forEach(([model, count]) => logger.info(`${indent}${model} \u00d7 ${count}`))
 };
